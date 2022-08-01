@@ -1,6 +1,14 @@
+import Garage from '../pages/garage/garage';
+
 class App {
-  public start(): void {
-    console.log('Hello');
+  private garage;
+
+  constructor() {
+    this.garage = new Garage();
+  }
+
+  public async start(): Promise<void> {
+    this.garage.createGarageContainer();
   }
 }
 
