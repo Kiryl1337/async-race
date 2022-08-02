@@ -14,6 +14,7 @@ class App {
     if (totalCount) {
       this.garage.garageContent(cars, totalCount, 1);
     }
+    this.eventListeners();
   }
 
   public async getCars(page: number, limit: number): Promise<CarResponse> {
@@ -23,6 +24,28 @@ class App {
       cars: await response.json(),
       totalCount: response.headers.get('X-Total-Count'),
     };
+  }
+
+  private eventListeners() {
+    const create = document.getElementById('create-submit') as HTMLButtonElement;
+    create.addEventListener('click', () => {
+      this.createCarAction();
+    });
+  }
+
+  private async createCarAction(): Promise<void> {
+    const name = (document.getElementById('create-name') as HTMLInputElement).value;
+    const color = (document.getElementById('create-color') as HTMLInputElement).value;
+    const body = { name, color };
+    return (
+      await fetch('http://127.0.0.1:3000/garage', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    ).json();
   }
 }
 
