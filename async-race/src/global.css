@@ -1,0 +1,136 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 5px;
+  background-color: #61e8d2;
+}
+
+.nav-button {
+  padding: 5px 15px;
+  background-color: #f2a31b;
+  text-transform: uppercase;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.garage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 20px 5%;
+}
+
+.garage-forms {
+  display: flex;
+  flex-wrap: wrap;
+  width: 345px;
+}
+
+.create-form, .update-form {
+  align-content: center;
+  column-gap: 20px;
+  display: flex;
+  margin-top: 20px;
+}
+
+.garage-controls {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.btn {
+  background-color: #b0e0e6;
+  border-radius: 10px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.garage {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.car-name {
+  font-weight: bold;
+}
+
+.garage-cars {
+  list-style-type: none;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.car-buttons {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  margin-bottom: 7px;
+}
+
+.race {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: dashed black 3px;
+  width: 95%;
+}
+
+.start-panel {
+  display: flex;
+  gap: 5px;
+}
+
+.start-engine-btn {
+  border: 2px solid #31a828;
+  color: #31a828;
+  background-color: transparent;
+  border-radius: 8px;
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.stop-engine-btn {
+  border: 2px solid red;
+  color: red;
+  background-color: transparent;
+  border-radius: 8px;
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(100);
+  opacity: 0.3;
+}
+
+.car-img {
+  display: block;
+  padding-top: 15px;
+  height: 40px;
+  width: 80px;
+}
+
+.finish-flag img{
+  display: block;
+  height: 45px;
+  width: 45px;
+}
+
+.pagination {
+  margin-left: 5%;
+}

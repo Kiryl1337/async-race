@@ -52,18 +52,16 @@ class Garage {
         <span class='car-name'>${name}</span>
       </div>
       <div class='race'>
-        <div class='start'>
           <div class='start-panel'>
             <button class='start-engine-btn' id='start-engine-car-${id}${engineStarted ? 'disabled' : ''}'>A</button>
             <button disabled class='stop-engine-btn' id='stop-engine-car-${id}${
       engineStarted ? 'disabled' : ''
     }'>B</button>
+            <div class='car' id='car-${id}'>
+              ${this.carImage(color)}
+            </div>
           </div>
-          <div class='car' id='car-${id}'>
-            ${this.carImage(color)}
-          </div>
-        </div>
-        <div class='finish-flag' id='finish-${id}'><img src="https://img.icons8.com/ios-glyphs/72/finish-flag.png"></div>
+          <div class='finish-flag' id='finish-${id}'><img src="https://img.icons8.com/ios-glyphs/72/finish-flag.png"></div>
       </div>
     `;
   }
@@ -88,7 +86,7 @@ class Garage {
 
   static carImage(color: string): string {
     return `
-      <svg version="1.2" xmlns="http://www.w3.org/2000/svg"  width="180px" height="45px" viewBox="0 0 500 160" style="fill:${color}">
+      <svg class="car-img" version="1.2" xmlns="http://www.w3.org/2000/svg"  width="180px" height="45px" viewBox="0 0 500 160" style="fill:${color}">
         <path fill-rule="evenodd" d="m4.1 67l3.9-3.6c0 0 11.6 2.1 19.5 1.8 7.8-0.3 16.4-11.7 8-11.5-2 0-4.2-0.4-6.3-1q0 0 0
           0c-7.1-1.9-14-6.1-14-6.1l-4.2-9c0 0-4.4-7.5 4.6-6.9 9 0.6 18.9 4.4 18.9 4.4 0 0 87.6-21.5 104.7-24.8 17.1-3.3
           89.6-17.6 153.3 14.5 0 0 40.2 18.9 44.1 19.2 0 0 119.9 5.8 159.4 41 0 0 0.6 12.9 0 21.3 0 0 1.8 5.4-1.3 10.6 0 0 2.1
