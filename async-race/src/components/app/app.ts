@@ -1,6 +1,8 @@
 import Garage from '../pages/garage/garage';
 import { Car, CarResponse } from '../utils/interfaces';
 
+let currentCar: Promise<Car>;
+
 class App {
   private garage;
 
@@ -43,6 +45,10 @@ class App {
         this.selectCar(eventTarget);
       }
     });
+    const update = document.getElementById('update-submit') as HTMLButtonElement;
+    update.addEventListener('click', () => {
+      this.updateCar();
+    });
   }
 
   private async createCarAction(): Promise<void> {
@@ -76,13 +82,29 @@ class App {
     const color = document.getElementById('update-color') as HTMLInputElement;
     const updateBtn = document.getElementById('update-submit') as HTMLButtonElement;
     const carId = element.id.split('-')[2];
-    const currentCar: Promise<Car> = (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
+    currentCar = (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
 
     name.value = (await currentCar).name;
     color.value = (await currentCar).color;
     name.disabled = false;
     color.disabled = false;
     updateBtn.disabled = false;
+  }
+
+  private async updateCar(): Promise<void> {
+    const name = (document.getElementById('update-name') as HTMLInputElement).value;
+    const color = (document.getElementById('update-color') as HTMLInputElement).value;
+    const carId = (await currentCar).id;
+    const body = { name, color };
+    return (
+      await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    ).json();
   }
 }
 
