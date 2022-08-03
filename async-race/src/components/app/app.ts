@@ -2,24 +2,28 @@ import Garage from '../pages/garage/garage';
 import { Car, CarResponse } from '../utils/interfaces';
 
 let currentCar: Promise<Car>;
+const NUMBER_SEVEN = 7;
 
 class App {
   private garage;
 
+  private paginationPage;
+
   constructor() {
     this.garage = new Garage();
+    this.paginationPage = 1;
   }
 
   public async start(): Promise<void> {
     this.garage.createGarageContainer();
-    const { cars, totalCount } = await this.getCars(1, 7);
+    const { cars, totalCount } = await this.getCars(this.paginationPage);
     if (totalCount) {
-      this.garage.garageContent(cars, totalCount, 1);
+      this.garage.garageContent(cars, totalCount, this.paginationPage);
     }
     this.eventListeners();
   }
 
-  public async getCars(page: number, limit: number): Promise<CarResponse> {
+  public async getCars(page: number, limit = NUMBER_SEVEN): Promise<CarResponse> {
     const response = await fetch(`
     ${'http://127.0.0.1:3000/garage'}?_page=${page}&_limit=${limit}`);
     return {
@@ -36,7 +40,7 @@ class App {
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
       if (eventTarget.className.includes('remove-btn')) {
-        this.removeCar(eventTarget, 1);
+        this.removeCar(eventTarget, this.paginationPage);
       }
     });
     window.addEventListener('click', async (event) => {
@@ -48,6 +52,14 @@ class App {
     const update = document.getElementById('update-submit') as HTMLButtonElement;
     update.addEventListener('click', () => {
       this.updateCar();
+    });
+    const nextBtn = document.getElementById('next') as HTMLButtonElement;
+    nextBtn.addEventListener('click', () => {
+      this.nextAction();
+    });
+    const prevBtn = document.getElementById('prev') as HTMLButtonElement;
+    prevBtn.addEventListener('click', async () => {
+      this.prevAction();
     });
   }
 
@@ -69,9 +81,8 @@ class App {
   private async removeCar(element: Element, page: number): Promise<void> {
     const carId = element.id.split('-')[2];
     const garage = document.querySelector('.garage') as HTMLDivElement;
-    garage.innerHTML = '';
     (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, { method: 'DELETE' })).json();
-    const { cars, totalCount } = await this.getCars(page, 7);
+    const { cars, totalCount } = await this.getCars(page);
     if (totalCount) {
       garage.innerHTML = this.garage.garageContent(cars, totalCount, page).innerHTML;
     }
@@ -105,6 +116,29 @@ class App {
         },
       })
     ).json();
+  }
+
+  private async nextAction(): Promise<void> {
+    const garage = document.querySelector('.garage') as HTMLDivElement;
+    const { totalCount } = await this.getCars(this.paginationPage);
+    if (totalCount) {
+      if (Number(totalCount) / (NUMBER_SEVEN * this.paginationPage) > 1) {
+        this.paginationPage += 1;
+        const { cars } = await this.getCars(this.paginationPage);
+        garage.innerHTML = this.garage.garageContent(cars, totalCount, this.paginationPage).innerHTML;
+      }
+    }
+  }
+
+  private async prevAction(): Promise<void> {
+    const garage = document.querySelector('.garage') as HTMLDivElement;
+    if (this.paginationPage > 1) {
+      this.paginationPage -= 1;
+      const { cars, totalCount } = await this.getCars(this.paginationPage);
+      if (totalCount) {
+        garage.innerHTML = this.garage.garageContent(cars, totalCount, this.paginationPage).innerHTML;
+      }
+    }
   }
 }
 
