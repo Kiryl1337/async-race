@@ -19,12 +19,12 @@ class Garage {
                         <div class="garage-forms">
                           <form class="create-form" id="create">
                             <input class="form-input" id="create-name" name="name" type="text">
-                            <input class="form-color" id="create-color" name="color" type="color" value="#FFFFFF">
+                            <input class="form-color" id="create-color" name="color" type="color" value="#000000">
                             <button class="btn" id="create-submit">Create</button>
                           </form>
                           <form class="update-form" id="update">
                             <input class="form-input" id="update-name" name="name" type="text" disabled>
-                            <input class="form-color" id="update-color" name="color" type="color" value="#FFFFFF" disabled>
+                            <input class="form-color" id="update-color" name="color" type="color" value="#000000" disabled>
                             <button class="btn" id="update-submit" href="#" disabled>Update</button>
                           </form>
                         </div>

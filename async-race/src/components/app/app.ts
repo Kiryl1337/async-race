@@ -1,5 +1,5 @@
 import Garage from '../pages/garage/garage';
-import { CarResponse } from '../utils/interfaces';
+import { Car, CarResponse } from '../utils/interfaces';
 
 class App {
   private garage;
@@ -37,6 +37,12 @@ class App {
         this.removeCar(eventTarget, 1);
       }
     });
+    window.addEventListener('click', async (event) => {
+      const eventTarget = <HTMLButtonElement>event.target;
+      if (eventTarget.className.includes('select-btn')) {
+        this.selectCar(eventTarget);
+      }
+    });
   }
 
   private async createCarAction(): Promise<void> {
@@ -63,6 +69,20 @@ class App {
     if (totalCount) {
       garage.innerHTML = this.garage.garageContent(cars, totalCount, page).innerHTML;
     }
+  }
+
+  private async selectCar(element: Element): Promise<void> {
+    const name = document.getElementById('update-name') as HTMLInputElement;
+    const color = document.getElementById('update-color') as HTMLInputElement;
+    const updateBtn = document.getElementById('update-submit') as HTMLButtonElement;
+    const carId = element.id.split('-')[2];
+    const currentCar: Promise<Car> = (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
+
+    name.value = (await currentCar).name;
+    color.value = (await currentCar).color;
+    name.disabled = false;
+    color.disabled = false;
+    updateBtn.disabled = false;
   }
 }
 
