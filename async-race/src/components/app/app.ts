@@ -31,6 +31,12 @@ class App {
     create.addEventListener('click', () => {
       this.createCarAction();
     });
+    window.addEventListener('click', async (event) => {
+      const eventTarget = <HTMLButtonElement>event.target;
+      if (eventTarget.className.includes('remove-btn')) {
+        this.removeCar(eventTarget, 1);
+      }
+    });
   }
 
   private async createCarAction(): Promise<void> {
@@ -46,6 +52,17 @@ class App {
         },
       })
     ).json();
+  }
+
+  private async removeCar(element: Element, page: number): Promise<void> {
+    const carId = element.id.split('-')[2];
+    const garage = document.querySelector('.garage') as HTMLDivElement;
+    garage.innerHTML = '';
+    (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, { method: 'DELETE' })).json();
+    const { cars, totalCount } = await this.getCars(page, 7);
+    if (totalCount) {
+      garage.innerHTML = this.garage.garageContent(cars, totalCount, page).innerHTML;
+    }
   }
 }
 
