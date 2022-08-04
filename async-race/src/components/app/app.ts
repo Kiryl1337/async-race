@@ -1,8 +1,10 @@
 import Garage from '../pages/garage/garage';
+import { carBrands, carModels } from '../utils/data';
 import { Car, CarResponse } from '../utils/interfaces';
 
 let currentCar: Promise<Car>;
 const NUMBER_SEVEN = 7;
+const NUMBER_ONE_HUNDRED = 100;
 
 class App {
   private garage;
@@ -61,6 +63,44 @@ class App {
     prevBtn.addEventListener('click', async () => {
       this.prevAction();
     });
+    const generator = document.getElementById('generator') as HTMLButtonElement;
+    generator.addEventListener('click', async () => {
+      this.generateCars();
+    });
+  }
+
+  private async generateCars(): Promise<void> {
+    for (let i = 0; i < NUMBER_ONE_HUNDRED; i++) {
+      const randomBrand = carBrands[Math.floor(Math.random() * carBrands.length)];
+      const randomModel = carModels[Math.floor(Math.random() * carModels.length)];
+      const randomName = randomBrand + ' ' + randomModel;
+      const randomColor = this.getRandomColor();
+
+      const body = { name: randomName, color: randomColor };
+      (
+        await fetch('http://127.0.0.1:3000/garage', {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+      ).json();
+    }
+    const garage = document.querySelector('.garage') as HTMLDivElement;
+    const { cars, totalCount } = await this.getCars(this.paginationPage);
+    if (totalCount) {
+      garage.innerHTML = this.garage.garageContent(cars, totalCount, this.paginationPage).innerHTML;
+    }
+  }
+
+  private getRandomColor(): string {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let j = 0; j < 6; j++) {
+      color += letters[Math.floor(Math.random() * letters.length)];
+    }
+    return color;
   }
 
   private async createCarAction(): Promise<void> {
