@@ -11,18 +11,31 @@ class App {
 
   private paginationPage;
 
+  private updateName;
+
+  private updateColor;
+
+  private updateBtn;
+
   constructor() {
     this.garage = new Garage();
+    this.garage.createGarageContainer();
     this.paginationPage = 1;
+    this.updateName = document.getElementById('update-name') as HTMLInputElement;
+    this.updateColor = document.getElementById('update-color') as HTMLInputElement;
+    this.updateBtn = document.getElementById('update-submit') as HTMLButtonElement;
   }
 
   public async start(): Promise<void> {
-    this.garage.createGarageContainer();
+    this.updateGarage();
+    this.eventListeners();
+  }
+
+  private async updateGarage(): Promise<void> {
     const { cars, totalCount } = await this.getCars(this.paginationPage);
     if (totalCount) {
       this.garage.garageContent(cars, totalCount, this.paginationPage);
     }
-    this.eventListeners();
   }
 
   public async getCars(page: number, limit = NUMBER_SEVEN): Promise<CarResponse> {
@@ -39,35 +52,28 @@ class App {
     create.addEventListener('click', async (event) => {
       event.preventDefault();
       this.createCarAction();
-      const { cars, totalCount } = await this.getCars(this.paginationPage);
-      if (totalCount) {
-        this.garage.garageContent(cars, totalCount, this.paginationPage);
-      }
+      this.updateGarage();
     });
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
       if (eventTarget.className.includes('remove-btn')) {
-        this.removeCar(eventTarget, this.paginationPage);
+        this.removeCar(eventTarget);
       }
-    });
-    window.addEventListener('click', async (event) => {
-      const eventTarget = <HTMLButtonElement>event.target;
       if (eventTarget.className.includes('select-btn')) {
         this.selectCar(eventTarget);
       }
     });
-    const update = document.getElementById('update-submit') as HTMLButtonElement;
-    update.addEventListener('click', async (event) => {
+
+    this.updateBtn?.addEventListener('click', async (event) => {
       event.preventDefault();
       this.updateCar();
-      const name = document.getElementById('update-name') as HTMLInputElement;
-      const color = document.getElementById('update-color') as HTMLInputElement;
-      const updateBtn = document.getElementById('update-submit') as HTMLButtonElement;
-      name.value = '';
-      color.value = '#000000';
-      name.disabled = true;
-      color.disabled = true;
-      updateBtn.disabled = true;
+      if (this.updateName && this.updateColor && this.updateBtn) {
+        this.updateName.value = '';
+        this.updateColor.value = '#000000';
+        this.updateName.disabled = true;
+        this.updateColor.disabled = true;
+        this.updateBtn.disabled = true;
+      }
     });
     const nextBtn = document.getElementById('next') as HTMLButtonElement;
     nextBtn.addEventListener('click', () => {
@@ -91,21 +97,15 @@ class App {
       const randomColor = this.getRandomColor();
 
       const body = { name: randomName, color: randomColor };
-      (
-        await fetch('http://127.0.0.1:3000/garage', {
-          method: 'POST',
-          body: JSON.stringify(body),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-      ).json();
+      await fetch('http://127.0.0.1:3000/garage', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
-    const garage = document.querySelector('.garage') as HTMLDivElement;
-    const { cars, totalCount } = await this.getCars(this.paginationPage);
-    if (totalCount) {
-      garage.innerHTML = this.garage.garageContent(cars, totalCount, this.paginationPage).innerHTML;
-    }
+    this.updateGarage();
   }
 
   private getRandomColor(): string {
@@ -121,81 +121,61 @@ class App {
     const name = (document.getElementById('create-name') as HTMLInputElement).value;
     const color = (document.getElementById('create-color') as HTMLInputElement).value;
     const body = { name, color };
-    return (
-      await fetch('http://127.0.0.1:3000/garage', {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    ).json();
+    await fetch('http://127.0.0.1:3000/garage', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
-  private async removeCar(element: Element, page: number): Promise<void> {
+  private async removeCar(element: Element): Promise<void> {
     const carId = element.id.split('-')[2];
-    const garage = document.querySelector('.garage') as HTMLDivElement;
-    (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, { method: 'DELETE' })).json();
-    const { cars, totalCount } = await this.getCars(page);
-    if (totalCount) {
-      garage.innerHTML = this.garage.garageContent(cars, totalCount, page).innerHTML;
-    }
+    await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, { method: 'DELETE' });
+    this.updateGarage();
   }
 
   private async selectCar(element: Element): Promise<void> {
-    const name = document.getElementById('update-name') as HTMLInputElement;
-    const color = document.getElementById('update-color') as HTMLInputElement;
-    const updateBtn = document.getElementById('update-submit') as HTMLButtonElement;
     const carId = element.id.split('-')[2];
     currentCar = (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
 
-    name.value = (await currentCar).name;
-    color.value = (await currentCar).color;
-    name.disabled = false;
-    color.disabled = false;
-    updateBtn.disabled = false;
+    this.updateName.value = (await currentCar).name;
+    this.updateColor.value = (await currentCar).color;
+    this.updateName.disabled = false;
+    this.updateColor.disabled = false;
+    this.updateBtn.disabled = false;
   }
 
   private async updateCar(): Promise<void> {
-    const name = (document.getElementById('update-name') as HTMLInputElement).value;
-    const color = (document.getElementById('update-color') as HTMLInputElement).value;
+    const name = this.updateName.value;
+    const color = this.updateColor.value;
     const carId = (await currentCar).id;
     const body = { name, color };
-    (
-      await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    ).json();
-    const { cars, totalCount } = await this.getCars(this.paginationPage);
-    if (totalCount) {
-      this.garage.garageContent(cars, totalCount, this.paginationPage);
-    }
+    await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    this.updateGarage();
   }
 
   private async nextAction(): Promise<void> {
-    const garage = document.querySelector('.garage') as HTMLDivElement;
     const { totalCount } = await this.getCars(this.paginationPage);
     if (totalCount) {
       if (Number(totalCount) / (NUMBER_SEVEN * this.paginationPage) > 1) {
         this.paginationPage += 1;
-        const { cars } = await this.getCars(this.paginationPage);
-        garage.innerHTML = this.garage.garageContent(cars, totalCount, this.paginationPage).innerHTML;
+        this.updateGarage();
       }
     }
   }
 
   private async prevAction(): Promise<void> {
-    const garage = document.querySelector('.garage') as HTMLDivElement;
     if (this.paginationPage > 1) {
       this.paginationPage -= 1;
-      const { cars, totalCount } = await this.getCars(this.paginationPage);
-      if (totalCount) {
-        garage.innerHTML = this.garage.garageContent(cars, totalCount, this.paginationPage).innerHTML;
-      }
+      this.updateGarage();
     }
   }
 }
