@@ -36,8 +36,13 @@ class App {
 
   private eventListeners() {
     const create = document.getElementById('create-submit') as HTMLButtonElement;
-    create.addEventListener('click', () => {
+    create.addEventListener('click', async (event) => {
+      event.preventDefault();
       this.createCarAction();
+      const { cars, totalCount } = await this.getCars(this.paginationPage);
+      if (totalCount) {
+        this.garage.garageContent(cars, totalCount, this.paginationPage);
+      }
     });
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
@@ -52,8 +57,17 @@ class App {
       }
     });
     const update = document.getElementById('update-submit') as HTMLButtonElement;
-    update.addEventListener('click', () => {
+    update.addEventListener('click', async (event) => {
+      event.preventDefault();
       this.updateCar();
+      const name = document.getElementById('update-name') as HTMLInputElement;
+      const color = document.getElementById('update-color') as HTMLInputElement;
+      const updateBtn = document.getElementById('update-submit') as HTMLButtonElement;
+      name.value = '';
+      color.value = '#000000';
+      name.disabled = true;
+      color.disabled = true;
+      updateBtn.disabled = true;
     });
     const nextBtn = document.getElementById('next') as HTMLButtonElement;
     nextBtn.addEventListener('click', () => {
@@ -147,7 +161,7 @@ class App {
     const color = (document.getElementById('update-color') as HTMLInputElement).value;
     const carId = (await currentCar).id;
     const body = { name, color };
-    return (
+    (
       await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, {
         method: 'PATCH',
         body: JSON.stringify(body),
@@ -156,6 +170,10 @@ class App {
         },
       })
     ).json();
+    const { cars, totalCount } = await this.getCars(this.paginationPage);
+    if (totalCount) {
+      this.garage.garageContent(cars, totalCount, this.paginationPage);
+    }
   }
 
   private async nextAction(): Promise<void> {
