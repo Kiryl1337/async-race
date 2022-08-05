@@ -1,4 +1,4 @@
-import createAnimation, { state } from '../pages/garage/carAnimation';
+import createAnimation, { animationMap } from '../pages/garage/carAnimation';
 import Garage from '../pages/garage/garage';
 import { carBrands, carModels } from '../utils/data';
 import { Car, CarResponse } from '../utils/interfaces';
@@ -125,9 +125,8 @@ class App {
       method: 'PATCH',
     });
     const car = document.getElementById(`car-${carId}`) as HTMLDivElement;
+    window.cancelAnimationFrame(animationMap[carId]);
     car.style.transform = 'translateX(0)';
-
-    cancelAnimationFrame(state);
   }
 
   public getPosition(element: HTMLElement): number {

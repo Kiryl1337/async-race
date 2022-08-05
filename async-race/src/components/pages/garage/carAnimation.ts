@@ -1,10 +1,9 @@
 const SUCCESS_STATUS = 200;
-
-export let state = 0;
+export const animationMap: { [key: string]: number } = {};
 
 async function createAnimation(car: HTMLElement, raceDistance: number, carId: string, raceTime: number): Promise<void> {
   let start: number | null = null;
-
+  let state = 0;
   function animationStep(timestamp: number): void {
     if (!start) {
       start = timestamp;
@@ -16,6 +15,7 @@ async function createAnimation(car: HTMLElement, raceDistance: number, carId: st
 
     if (passed < raceDistance) {
       state = window.requestAnimationFrame(animationStep);
+      animationMap[carId] = state;
     }
   }
 
@@ -24,7 +24,7 @@ async function createAnimation(car: HTMLElement, raceDistance: number, carId: st
     method: 'PATCH',
   });
   if (resolve.status !== SUCCESS_STATUS) {
-    cancelAnimationFrame(state);
+    window.cancelAnimationFrame(state);
   }
 }
 
