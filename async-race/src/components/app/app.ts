@@ -1,4 +1,4 @@
-import createAnimation from '../pages/garage/carAnimation';
+import createAnimation, { state } from '../pages/garage/carAnimation';
 import Garage from '../pages/garage/garage';
 import { carBrands, carModels } from '../utils/data';
 import { Car, CarResponse } from '../utils/interfaces';
@@ -67,6 +67,9 @@ class App {
       if (eventTarget.className.includes('start-engine-btn')) {
         this.startEngine(eventTarget);
       }
+      if (eventTarget.className.includes('stop-engine-btn')) {
+        this.stopEngine(eventTarget);
+      }
     });
 
     this.updateBtn?.addEventListener('click', async (event) => {
@@ -110,8 +113,21 @@ class App {
     const carPosition = this.getPosition(car);
     const flagPosition = this.getPosition(flag);
     const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
-
     createAnimation(car, raceDistance, carId, raceTime);
+  }
+
+  private async stopEngine(stopBtn: HTMLButtonElement): Promise<void> {
+    stopBtn.disabled = true;
+    const carId = stopBtn.id.split('-')[3];
+    const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
+    startBtn.disabled = false;
+    await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=stopped`, {
+      method: 'PATCH',
+    });
+    const car = document.getElementById(`car-${carId}`) as HTMLDivElement;
+    car.style.transform = 'translateX(0)';
+
+    cancelAnimationFrame(state);
   }
 
   public getPosition(element: HTMLElement): number {

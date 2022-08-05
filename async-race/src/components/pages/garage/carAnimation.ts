@@ -1,8 +1,9 @@
 const SUCCESS_STATUS = 200;
 
+export let state = 0;
+
 async function createAnimation(car: HTMLElement, raceDistance: number, carId: string, raceTime: number): Promise<void> {
   let start: number | null = null;
-  let state = null;
 
   function animationStep(timestamp: number): void {
     if (!start) {
