@@ -125,10 +125,11 @@ button:disabled {
   width: 80px;
 }
 
-.finish-flag img{
+.finish-flag img {
   display: block;
   height: 45px;
   width: 45px;
+  margin-right: 60px;
 }
 
 .pagination {

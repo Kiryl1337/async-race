@@ -1,9 +1,11 @@
+import createAnimation from '../pages/garage/carAnimation';
 import Garage from '../pages/garage/garage';
 import { carBrands, carModels } from '../utils/data';
 import { Car, CarResponse } from '../utils/interfaces';
 
 let currentCar: Promise<Car>;
 const NUMBER_SEVEN = 7;
+const NUMBER_TWENTY = 20;
 const NUMBER_ONE_HUNDRED = 100;
 
 class App {
@@ -62,6 +64,9 @@ class App {
       if (eventTarget.className.includes('select-btn')) {
         this.selectCar(eventTarget);
       }
+      if (eventTarget.className.includes('start-engine-btn')) {
+        this.startEngine(eventTarget);
+      }
     });
 
     this.updateBtn?.addEventListener('click', async (event) => {
@@ -87,6 +92,31 @@ class App {
     generator.addEventListener('click', async () => {
       this.generateCars();
     });
+  }
+
+  private async startEngine(startBtn: HTMLButtonElement): Promise<void> {
+    startBtn.disabled = true;
+    const carId = startBtn.id.split('-')[3];
+    const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
+    stopBtn.disabled = false;
+    const race = await (
+      await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=started`, {
+        method: 'PATCH',
+      })
+    ).json();
+    const raceTime = Math.round(race.distance / race.velocity);
+    const car = document.getElementById(`car-${carId}`) as HTMLElement;
+    const flag = document.getElementById(`finish-${carId}`) as HTMLElement;
+    const carPosition = this.getPosition(car);
+    const flagPosition = this.getPosition(flag);
+    const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
+
+    createAnimation(car, raceDistance, carId, raceTime);
+  }
+
+  public getPosition(element: HTMLElement): number {
+    const { left, width } = element.getBoundingClientRect();
+    return left + width / 2;
   }
 
   private async generateCars(): Promise<void> {
