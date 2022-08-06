@@ -58,16 +58,16 @@ class App {
     });
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
-      if (eventTarget.className.includes('remove-btn')) {
+      if (eventTarget.className === 'btn remove-btn') {
         this.removeCar(eventTarget);
       }
-      if (eventTarget.className.includes('select-btn')) {
+      if (eventTarget.className === 'btn select-btn') {
         this.selectCar(eventTarget);
       }
-      if (eventTarget.className.includes('start-engine-btn')) {
-        this.startEngine(eventTarget);
+      if (eventTarget.className === 'start-engine-btn') {
+        this.startEngine(eventTarget.id.split('-')[3]);
       }
-      if (eventTarget.className.includes('stop-engine-btn')) {
+      if (eventTarget.className === 'stop-engine-btn') {
         this.stopEngine(eventTarget);
       }
     });
@@ -105,25 +105,14 @@ class App {
     const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
     cars.forEach(async (carElem) => {
       const carId = carElem.id.toString();
-      const race = await (
-        await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=started`, {
-          method: 'PATCH',
-        })
-      ).json();
-      const raceTime = Math.round(race.distance / race.velocity);
-      const car = document.getElementById(`car-${carId}`) as HTMLElement;
-      const flag = document.getElementById(`finish-${carId}`) as HTMLElement;
-      const carPosition = this.getPosition(car);
-      const flagPosition = this.getPosition(flag);
-      const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
-      createAnimation(car, raceDistance, carId, raceTime);
+      this.startEngine(carId);
     });
   }
 
-  private async startEngine(startBtn: HTMLButtonElement): Promise<void> {
-    startBtn.disabled = true;
-    const carId = startBtn.id.split('-')[3];
+  private async startEngine(carId: string): Promise<void> {
+    const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
     const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
+    startBtn.disabled = true;
     stopBtn.disabled = false;
     const race = await (
       await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=started`, {
