@@ -36,11 +36,15 @@ class Garage {
                         <div class="garage">
 
                         </div>
-                      </div>
-                      <div class="pagination">
+                        <div class="pagination">
                           <button class="btn pagination-btn" id="prev">Prev</button>
                           <button class="btn pagination-btn" id="next">Next</button>
-                      </div>`;
+                        </div>
+                      </div>
+                      <div class="winners-container">
+
+                      </div>
+                      `;
     return body;
   }
 

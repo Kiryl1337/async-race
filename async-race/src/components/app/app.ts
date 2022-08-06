@@ -1,5 +1,6 @@
 import createAnimation, { animationMap } from '../pages/garage/carAnimation';
 import Garage from '../pages/garage/garage';
+import Winners from '../pages/winners/winners';
 import { carBrands, carModels } from '../utils/data';
 import { Car, CarResponse } from '../utils/interfaces';
 
@@ -11,6 +12,8 @@ const NUMBER_ONE_HUNDRED = 100;
 class App {
   private garage;
 
+  private winners;
+
   private paginationPage;
 
   private updateName;
@@ -21,6 +24,7 @@ class App {
 
   constructor() {
     this.garage = new Garage();
+    this.winners = new Winners();
     this.garage.createGarageContainer();
     this.paginationPage = 1;
     this.updateName = document.getElementById('update-name') as HTMLInputElement;
@@ -106,6 +110,22 @@ class App {
       race.disabled = false;
       reset.disabled = true;
       this.stopRace();
+    });
+
+    const garageBtn = document.getElementById('garage-view') as HTMLButtonElement;
+    const winnersBtn = document.getElementById('winners-view') as HTMLButtonElement;
+    const garage = document.querySelector('.garage-container') as HTMLDivElement;
+    const winners = document.querySelector('.winners-container') as HTMLDivElement;
+    garageBtn.addEventListener('click', () => {
+      this.updateGarage();
+      winners.style.display = 'none';
+      garage.style.display = 'flex';
+    });
+
+    winnersBtn.addEventListener('click', () => {
+      this.winners.createWinners();
+      winners.style.display = 'flex';
+      garage.style.display = 'none';
     });
   }
 
