@@ -95,6 +95,29 @@ class App {
     generator.addEventListener('click', async () => {
       this.generateCars();
     });
+    const race = document.getElementById('race') as HTMLButtonElement;
+    race.addEventListener('click', async () => {
+      this.startRace();
+    });
+  }
+
+  private async startRace() {
+    const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
+    cars.forEach(async (carElem) => {
+      const carId = carElem.id.toString();
+      const race = await (
+        await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=started`, {
+          method: 'PATCH',
+        })
+      ).json();
+      const raceTime = Math.round(race.distance / race.velocity);
+      const car = document.getElementById(`car-${carId}`) as HTMLElement;
+      const flag = document.getElementById(`finish-${carId}`) as HTMLElement;
+      const carPosition = this.getPosition(car);
+      const flagPosition = this.getPosition(flag);
+      const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
+      createAnimation(car, raceDistance, carId, raceTime);
+    });
   }
 
   private async startEngine(startBtn: HTMLButtonElement): Promise<void> {
