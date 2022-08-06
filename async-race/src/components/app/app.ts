@@ -68,7 +68,7 @@ class App {
         this.startEngine(eventTarget.id.split('-')[3]);
       }
       if (eventTarget.className === 'stop-engine-btn') {
-        this.stopEngine(eventTarget);
+        this.stopEngine(eventTarget.id.split('-')[3]);
       }
     });
 
@@ -96,8 +96,16 @@ class App {
       this.generateCars();
     });
     const race = document.getElementById('race') as HTMLButtonElement;
+    const reset = document.getElementById('reset') as HTMLButtonElement;
     race.addEventListener('click', async () => {
+      race.disabled = true;
+      reset.disabled = false;
       this.startRace();
+    });
+    reset.addEventListener('click', async () => {
+      race.disabled = false;
+      reset.disabled = true;
+      this.stopRace();
     });
   }
 
@@ -109,11 +117,17 @@ class App {
     });
   }
 
+  private async stopRace() {
+    const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
+    cars.forEach(async (carElem) => {
+      const carId = carElem.id.toString();
+      this.stopEngine(carId);
+    });
+  }
+
   private async startEngine(carId: string): Promise<void> {
     const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
     const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
     const race = await (
       await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=started`, {
         method: 'PATCH',
@@ -126,19 +140,21 @@ class App {
     const flagPosition = this.getPosition(flag);
     const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
     createAnimation(car, raceDistance, carId, raceTime);
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
   }
 
-  private async stopEngine(stopBtn: HTMLButtonElement): Promise<void> {
-    stopBtn.disabled = true;
-    const carId = stopBtn.id.split('-')[3];
+  private async stopEngine(carId: string): Promise<void> {
+    const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
     const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
-    startBtn.disabled = false;
     await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=stopped`, {
       method: 'PATCH',
     });
     const car = document.getElementById(`car-${carId}`) as HTMLDivElement;
     window.cancelAnimationFrame(animationMap[carId]);
     car.style.transform = 'translateX(0)';
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
   }
 
   public getPosition(element: HTMLElement): number {

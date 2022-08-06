@@ -30,7 +30,7 @@ class Garage {
                         </div>
                         <div class="garage-controls">
                           <button class="btn race-btn" id="race">Race</button>
-                          <button class="btn reset-btn" id="reset">Reset</button>
+                          <button class="btn reset-btn" id="reset" disabled>Reset</button>
                           <button class="btn generate-btn" id="generator">Generate cars</button>
                         </div>
                         <div class="garage">
