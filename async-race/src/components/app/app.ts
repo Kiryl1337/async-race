@@ -141,6 +141,7 @@ class App {
         const winnerCar: Car = await (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
         const winnerTime = Number((Number(raceTime) / NUMBER_ONE_THOUSAND).toFixed(2));
         this.winners.createWinnerMessage(winnerCar.name, winnerTime);
+        this.winners.addWinner(carId, winnerTime);
       }
     });
   }
