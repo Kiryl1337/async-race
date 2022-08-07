@@ -1,4 +1,4 @@
-import createAnimation, { animationMap } from '../pages/garage/carAnimation';
+import createAnimation, { animationMap, SUCCESS_STATUS } from '../pages/garage/carAnimation';
 import Garage from '../pages/garage/garage';
 import Winners from '../pages/winners/winners';
 import { carBrands, carModels } from '../utils/data';
@@ -8,6 +8,7 @@ let currentCar: Promise<Car>;
 const NUMBER_SEVEN = 7;
 const NUMBER_TWENTY = 20;
 const NUMBER_ONE_HUNDRED = 100;
+const NUMBER_ONE_THOUSAND = 1000;
 
 class App {
   private garage;
@@ -131,9 +132,16 @@ class App {
 
   private async startRace() {
     const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
+    let isWinner = false;
     cars.forEach(async (carElem) => {
       const carId = carElem.id.toString();
-      this.startEngine(carId);
+      const { raceStatus, raceTime } = await this.startEngine(carId);
+      if ((await raceStatus) === SUCCESS_STATUS && !isWinner) {
+        isWinner = true;
+        const winnerCar: Car = await (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
+        const winnerTime = Number((Number(raceTime) / NUMBER_ONE_THOUSAND).toFixed(2));
+        this.winners.createWinnerMessage(winnerCar.name, winnerTime);
+      }
     });
   }
 
@@ -145,7 +153,7 @@ class App {
     });
   }
 
-  private async startEngine(carId: string): Promise<void> {
+  private async startEngine(carId: string): Promise<{ [key: string]: number | Promise<number> }> {
     const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
     const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
     const race = await (
@@ -159,9 +167,10 @@ class App {
     const carPosition = this.getPosition(car);
     const flagPosition = this.getPosition(flag);
     const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
-    createAnimation(car, raceDistance, carId, raceTime);
+    const raceStatus = createAnimation(car, raceDistance, carId, raceTime);
     startBtn.disabled = true;
     stopBtn.disabled = false;
+    return { raceStatus, raceTime };
   }
 
   private async stopEngine(carId: string): Promise<void> {

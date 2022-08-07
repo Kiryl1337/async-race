@@ -1,3 +1,4 @@
+const FIVE_SECONDS = 5000;
 class Winners {
   public createWinners(): HTMLElement {
     const body = document.querySelector('body') as HTMLElement;
@@ -27,6 +28,19 @@ class Winners {
         </div>
     `;
     return body;
+  }
+
+  public async createWinnerMessage(name: string, time: number): Promise<void> {
+    const body = document.querySelector('body') as HTMLElement;
+    const winnerMessage = document.createElement('div') as HTMLDivElement;
+    winnerMessage.className = 'winner-message';
+    winnerMessage.innerHTML = `
+            <p>${name} went first(${time}s)</p>
+    `;
+    setTimeout(() => {
+      winnerMessage.style.display = 'none';
+    }, FIVE_SECONDS);
+    body.appendChild(winnerMessage);
   }
 }
 
