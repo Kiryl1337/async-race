@@ -88,11 +88,11 @@ class App {
         this.updateBtn.disabled = true;
       }
     });
-    const nextBtn = document.getElementById('next') as HTMLButtonElement;
+    const nextBtn = document.getElementById('garage-next') as HTMLButtonElement;
     nextBtn.addEventListener('click', () => {
       this.nextAction();
     });
-    const prevBtn = document.getElementById('prev') as HTMLButtonElement;
+    const prevBtn = document.getElementById('garage-prev') as HTMLButtonElement;
     prevBtn.addEventListener('click', async () => {
       this.prevAction();
     });

@@ -5,6 +5,12 @@ import Garage from '../garage/garage';
 const FIVE_SECONDS = 5000;
 const NUMBER_TEN = 10;
 class Winners {
+  private paginationPage;
+
+  constructor() {
+    this.paginationPage = 1;
+  }
+
   public async createWinners(winners: Winner[], totalCount: string, page: number): Promise<void> {
     const winnersContainer = document.querySelector('.winners-container') as HTMLDivElement;
     winnersContainer.innerHTML = `
@@ -26,8 +32,8 @@ class Winners {
             </tbody>
           </table>
           <div class="pagination">
-            <button class="btn pagination-btn" id="prev">Prev</button>
-            <button class="btn pagination-btn" id="next">Next</button>
+            <button class="btn pagination-btn" id="winners-prev">Prev</button>
+            <button class="btn pagination-btn" id="winners-next">Next</button>
           </div>
         </div>`;
   }
@@ -77,9 +83,10 @@ class Winners {
   }
 
   public async updateWinners(): Promise<void> {
-    const { winners, totalCount } = await this.getWinners(1);
+    const { winners, totalCount } = await this.getWinners(this.paginationPage);
     if (totalCount) {
-      this.createWinners(winners, totalCount, 1);
+      await this.createWinners(winners, totalCount, this.paginationPage);
+      this.eventListeners();
     }
   }
 
@@ -102,6 +109,34 @@ class Winners {
           'Content-Type': 'application/json',
         },
       });
+    }
+  }
+
+  public eventListeners(): void {
+    const nextBtn = document.getElementById('winners-next') as HTMLButtonElement;
+    nextBtn.addEventListener('click', () => {
+      this.nextAction();
+    });
+    const prevBtn = document.getElementById('winners-prev') as HTMLButtonElement;
+    prevBtn.addEventListener('click', async () => {
+      this.prevAction();
+    });
+  }
+
+  private async nextAction(): Promise<void> {
+    const { totalCount } = await this.getWinners(this.paginationPage);
+    if (totalCount) {
+      if (Number(totalCount) / (NUMBER_TEN * this.paginationPage) > 1) {
+        this.paginationPage += 1;
+        this.updateWinners();
+      }
+    }
+  }
+
+  private async prevAction(): Promise<void> {
+    if (this.paginationPage > 1) {
+      this.paginationPage -= 1;
+      this.updateWinners();
     }
   }
 }

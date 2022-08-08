@@ -37,8 +37,8 @@ class Garage {
 
                         </div>
                         <div class="pagination">
-                          <button class="btn pagination-btn" id="prev">Prev</button>
-                          <button class="btn pagination-btn" id="next">Next</button>
+                          <button class="btn pagination-btn" id="garage-prev">Prev</button>
+                          <button class="btn pagination-btn" id="garage-next">Next</button>
                         </div>
                       </div>
                       <div class="winners-container">
