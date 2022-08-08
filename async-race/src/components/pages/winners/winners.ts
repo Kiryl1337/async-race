@@ -4,8 +4,17 @@ import Garage from '../garage/garage';
 
 const FIVE_SECONDS = 5000;
 const NUMBER_TEN = 10;
+
 class Winners {
   private paginationPage;
+
+  private sortByWins = 'DESC';
+
+  private sortByTime = 'DESC';
+
+  private globalSort = 'time';
+
+  private globalOrder = 'ASC';
 
   constructor() {
     this.paginationPage = 1;
@@ -69,8 +78,10 @@ class Winners {
     body.appendChild(winnerMessage);
   }
 
-  public async getWinners(page: number, limit = NUMBER_TEN): Promise<WinnerResponse> {
-    const response = await fetch(`${'http://127.0.0.1:3000/winners'}?_page=${page}&_limit=${limit}`);
+  public async getWinners(page: number, sort: string, order: string, limit = NUMBER_TEN): Promise<WinnerResponse> {
+    const response = await fetch(
+      `${'http://127.0.0.1:3000/winners'}?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`,
+    );
     const winners = await response.json();
     return {
       winners: await Promise.all<Winner>(
@@ -83,7 +94,7 @@ class Winners {
   }
 
   public async updateWinners(): Promise<void> {
-    const { winners, totalCount } = await this.getWinners(this.paginationPage);
+    const { winners, totalCount } = await this.getWinners(this.paginationPage, this.globalSort, this.globalOrder);
     if (totalCount) {
       await this.createWinners(winners, totalCount, this.paginationPage);
       this.eventListeners();
@@ -121,10 +132,34 @@ class Winners {
     prevBtn.addEventListener('click', async () => {
       this.prevAction();
     });
+    const winsBtn = document.querySelector('.wins-btn') as HTMLElement;
+    winsBtn.addEventListener('click', async () => {
+      if (this.sortByWins === 'ASC') {
+        this.sortByWins = 'DESC';
+        this.globalOrder = 'DESC';
+      } else {
+        this.sortByWins = 'ASC';
+        this.globalOrder = 'ASC';
+      }
+      this.globalSort = 'wins';
+      this.updateWinners();
+    });
+    const timeBtn = document.querySelector('.time-btn') as HTMLElement;
+    timeBtn.addEventListener('click', async () => {
+      if (this.sortByTime === 'ASC') {
+        this.sortByTime = 'DESC';
+        this.globalOrder = 'DESC';
+      } else {
+        this.sortByTime = 'ASC';
+        this.globalOrder = 'ASC';
+      }
+      this.globalSort = 'time';
+      this.updateWinners();
+    });
   }
 
   private async nextAction(): Promise<void> {
-    const { totalCount } = await this.getWinners(this.paginationPage);
+    const { totalCount } = await this.getWinners(this.paginationPage, this.globalSort, this.globalOrder);
     if (totalCount) {
       if (Number(totalCount) / (NUMBER_TEN * this.paginationPage) > 1) {
         this.paginationPage += 1;
