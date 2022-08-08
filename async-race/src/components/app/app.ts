@@ -124,7 +124,7 @@ class App {
     });
 
     winnersBtn.addEventListener('click', () => {
-      this.winners.createWinners();
+      this.winners.updateWinners();
       winners.style.display = 'flex';
       garage.style.display = 'none';
     });
