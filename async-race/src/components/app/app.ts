@@ -55,8 +55,9 @@ class App {
   }
 
   private eventListeners() {
-    const create = document.getElementById('create-submit') as HTMLButtonElement;
-    create.addEventListener('click', async (event) => {
+    const create = document.getElementById('create') as HTMLButtonElement;
+    create.addEventListener('submit', async (event) => {
+      (document.getElementById('create-name') as HTMLInputElement).value = '';
       event.preventDefault();
       this.createCarAction();
       this.updateGarage();
@@ -76,8 +77,8 @@ class App {
         this.stopEngine(eventTarget.id.split('-')[3]);
       }
     });
-
-    this.updateBtn?.addEventListener('click', async (event) => {
+    const update = document.getElementById('update') as HTMLButtonElement;
+    update.addEventListener('submit', async (event) => {
       event.preventDefault();
       this.updateCar();
       if (this.updateName && this.updateColor && this.updateBtn) {

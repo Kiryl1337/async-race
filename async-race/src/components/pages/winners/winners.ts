@@ -15,9 +15,9 @@ class Winners {
     const winnersContainer = document.querySelector('.winners-container') as HTMLDivElement;
     winnersContainer.innerHTML = `
         <div class="winners">
-          <h1 class='winners-title'>Winners(${totalCount})</h1>
-          <h2 class='winners-page'>Page ${page}#</h2>
-          <table>
+          <h1 class='winners-title'>Winners (${totalCount})</h1>
+          <h2 class='winners-page'>Page #${page}</h2>
+          <table class="winners-table">
             <thead>
               <tr>
                 <th>№</th>
@@ -31,7 +31,7 @@ class Winners {
                ${await (await this.createWinnersData(winners, page)).join('')} 
             </tbody>
           </table>
-          <div class="pagination">
+          <div class="winners-pagination">
             <button class="btn pagination-btn" id="winners-prev">Prev</button>
             <button class="btn pagination-btn" id="winners-next">Next</button>
           </div>

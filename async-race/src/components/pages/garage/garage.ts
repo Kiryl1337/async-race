@@ -18,12 +18,12 @@ class Garage {
                       <div class="garage-container">
                         <div class="garage-forms">
                           <form class="create-form" id="create">
-                            <input class="form-input" id="create-name" name="name" type="text">
+                            <input class="form-input" id="create-name" name="name" type="text" required>
                             <input class="form-color" id="create-color" name="color" type="color" value="#000000">
                             <button class="btn" id="create-submit">Create</button>
                           </form>
                           <form class="update-form" id="update">
-                            <input class="form-input" id="update-name" name="name" type="text" disabled>
+                            <input class="form-input" id="update-name" name="name" type="text" disabled required>
                             <input class="form-color" id="update-color" name="color" type="color" value="#000000" disabled>
                             <button class="btn" id="update-submit" href="#" disabled>Update</button>
                           </form>
@@ -36,7 +36,7 @@ class Garage {
                         <div class="garage">
 
                         </div>
-                        <div class="pagination">
+                        <div class="garage-pagination">
                           <button class="btn pagination-btn" id="garage-prev">Prev</button>
                           <button class="btn pagination-btn" id="garage-next">Next</button>
                         </div>
