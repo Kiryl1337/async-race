@@ -237,6 +237,7 @@ class App {
   private async removeCar(element: Element): Promise<void> {
     const carId = element.id.split('-')[2];
     await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, { method: 'DELETE' });
+    await fetch(`${'http://127.0.0.1:3000/winners'}/${carId}`, { method: 'DELETE' });
     this.updateGarage();
   }
 
