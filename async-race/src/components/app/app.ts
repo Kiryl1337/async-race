@@ -1,14 +1,21 @@
-import createAnimation, { animationMap, SUCCESS_STATUS } from '../pages/garage/carAnimation';
+import createAnimation from '../pages/garage/carAnimation';
 import Garage from '../pages/garage/garage';
 import Winners from '../pages/winners/winners';
+import {
+  animationMap,
+  ENGINE,
+  GARAGE,
+  NUMBER_ONE_HUNDRED,
+  NUMBER_ONE_THOUSAND,
+  NUMBER_SEVEN,
+  NUMBER_TWENTY,
+  SUCCESS_STATUS,
+  WINNERS,
+} from '../utils/constants';
 import { carBrands, carModels } from '../utils/data';
 import { Car, CarResponse } from '../utils/interfaces';
 
 let currentCar: Promise<Car>;
-const NUMBER_SEVEN = 7;
-const NUMBER_TWENTY = 20;
-const NUMBER_ONE_HUNDRED = 100;
-const NUMBER_ONE_THOUSAND = 1000;
 
 class App {
   private garage;
@@ -47,7 +54,7 @@ class App {
 
   public async getCars(page: number, limit = NUMBER_SEVEN): Promise<CarResponse> {
     const response = await fetch(`
-    ${'http://127.0.0.1:3000/garage'}?_page=${page}&_limit=${limit}`);
+    ${GARAGE}?_page=${page}&_limit=${limit}`);
     return {
       cars: await response.json(),
       totalCount: response.headers.get('X-Total-Count'),
@@ -55,13 +62,6 @@ class App {
   }
 
   private eventListeners() {
-    const create = document.getElementById('create') as HTMLButtonElement;
-    create.addEventListener('submit', async (event) => {
-      (document.getElementById('create-name') as HTMLInputElement).value = '';
-      event.preventDefault();
-      this.createCarAction();
-      this.updateGarage();
-    });
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
       if (eventTarget.className === 'btn remove-btn') {
@@ -76,26 +76,6 @@ class App {
       if (eventTarget.className === 'stop-engine-btn') {
         this.stopEngine(eventTarget.id.split('-')[3]);
       }
-    });
-    const update = document.getElementById('update') as HTMLButtonElement;
-    update.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      this.updateCar();
-      if (this.updateName && this.updateColor && this.updateBtn) {
-        this.updateName.value = '';
-        this.updateColor.value = '#000000';
-        this.updateName.disabled = true;
-        this.updateColor.disabled = true;
-        this.updateBtn.disabled = true;
-      }
-    });
-    const nextBtn = document.getElementById('garage-next') as HTMLButtonElement;
-    nextBtn.addEventListener('click', () => {
-      this.nextAction();
-    });
-    const prevBtn = document.getElementById('garage-prev') as HTMLButtonElement;
-    prevBtn.addEventListener('click', async () => {
-      this.prevAction();
     });
     const generator = document.getElementById('generator') as HTMLButtonElement;
     generator.addEventListener('click', async () => {
@@ -113,7 +93,33 @@ class App {
       reset.disabled = true;
       this.stopRace();
     });
+    this.formEventListeners();
+    this.navEventListeners();
+    this.paginationEventListeners();
+  }
 
+  private formEventListeners() {
+    const create = document.getElementById('create') as HTMLButtonElement;
+    create.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      this.createCarAction();
+      this.updateGarage();
+    });
+    const update = document.getElementById('update') as HTMLButtonElement;
+    update.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      this.updateCar();
+      if (this.updateName && this.updateColor && this.updateBtn) {
+        this.updateName.value = '';
+        this.updateColor.value = '#000000';
+        this.updateName.disabled = true;
+        this.updateColor.disabled = true;
+        this.updateBtn.disabled = true;
+      }
+    });
+  }
+
+  private navEventListeners() {
     const garageBtn = document.getElementById('garage-view') as HTMLButtonElement;
     const winnersBtn = document.getElementById('winners-view') as HTMLButtonElement;
     const garage = document.querySelector('.garage-container') as HTMLDivElement;
@@ -131,6 +137,17 @@ class App {
     });
   }
 
+  private paginationEventListeners() {
+    const nextBtn = document.getElementById('garage-next') as HTMLButtonElement;
+    nextBtn.addEventListener('click', () => {
+      this.nextAction();
+    });
+    const prevBtn = document.getElementById('garage-prev') as HTMLButtonElement;
+    prevBtn.addEventListener('click', async () => {
+      this.prevAction();
+    });
+  }
+
   private async startRace() {
     const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
     let isWinner = false;
@@ -139,7 +156,7 @@ class App {
       const { raceStatus, raceTime } = await this.startEngine(carId);
       if ((await raceStatus) === SUCCESS_STATUS && !isWinner) {
         isWinner = true;
-        const winnerCar: Car = await (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
+        const winnerCar: Car = await (await fetch(`${GARAGE}/${carId}`)).json();
         const winnerTime = Number((Number(raceTime) / NUMBER_ONE_THOUSAND).toFixed(2));
         this.winners.createWinnerMessage(winnerCar.name, winnerTime);
         this.winners.addWinner(carId, winnerTime);
@@ -159,7 +176,7 @@ class App {
     const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
     const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
     const race = await (
-      await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=started`, {
+      await fetch(`${ENGINE}?id=${carId}&status=started`, {
         method: 'PATCH',
       })
     ).json();
@@ -178,7 +195,7 @@ class App {
   private async stopEngine(carId: string): Promise<void> {
     const stopBtn = document.getElementById(`stop-engine-car-${carId}`) as HTMLInputElement;
     const startBtn = document.getElementById(`start-engine-car-${carId}`) as HTMLInputElement;
-    await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=stopped`, {
+    await fetch(`${ENGINE}?id=${carId}&status=stopped`, {
       method: 'PATCH',
     });
     const car = document.getElementById(`car-${carId}`) as HTMLDivElement;
@@ -201,7 +218,7 @@ class App {
       const randomColor = this.getRandomColor();
 
       const body = { name: randomName, color: randomColor };
-      await fetch('http://127.0.0.1:3000/garage', {
+      await fetch(GARAGE, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
@@ -225,25 +242,26 @@ class App {
     const name = (document.getElementById('create-name') as HTMLInputElement).value;
     const color = (document.getElementById('create-color') as HTMLInputElement).value;
     const body = { name, color };
-    await fetch('http://127.0.0.1:3000/garage', {
+    await fetch(GARAGE, {
       method: 'POST',
       body: JSON.stringify(body),
       headers: {
         'Content-Type': 'application/json',
       },
     });
+    (document.getElementById('create-name') as HTMLInputElement).value = '';
   }
 
   private async removeCar(element: Element): Promise<void> {
     const carId = element.id.split('-')[2];
-    await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, { method: 'DELETE' });
-    await fetch(`${'http://127.0.0.1:3000/winners'}/${carId}`, { method: 'DELETE' });
+    await fetch(`${GARAGE}/${carId}`, { method: 'DELETE' });
+    await fetch(`${WINNERS}/${carId}`, { method: 'DELETE' });
     this.updateGarage();
   }
 
   private async selectCar(element: Element): Promise<void> {
     const carId = element.id.split('-')[2];
-    currentCar = (await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`)).json();
+    currentCar = (await fetch(`${GARAGE}/${carId}`)).json();
 
     this.updateName.value = (await currentCar).name;
     this.updateColor.value = (await currentCar).color;
@@ -257,7 +275,7 @@ class App {
     const color = this.updateColor.value;
     const carId = (await currentCar).id;
     const body = { name, color };
-    await fetch(`${'http://127.0.0.1:3000/garage'}/${carId}`, {
+    await fetch(`${GARAGE}/${carId}`, {
       method: 'PATCH',
       body: JSON.stringify(body),
       headers: {

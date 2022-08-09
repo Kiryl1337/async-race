@@ -1,5 +1,4 @@
-export const SUCCESS_STATUS = 200;
-export const animationMap: { [key: string]: number } = {};
+import { animationMap, ENGINE, SUCCESS_STATUS } from '../../utils/constants';
 
 async function createAnimation(
   car: HTMLElement,
@@ -25,7 +24,7 @@ async function createAnimation(
   }
 
   state = window.requestAnimationFrame(animationStep);
-  const resolve = await fetch(`${'http://127.0.0.1:3000/engine'}?id=${carId}&status=drive`, {
+  const resolve = await fetch(`${ENGINE}?id=${carId}&status=drive`, {
     method: 'PATCH',
   });
   if (resolve.status !== SUCCESS_STATUS) {

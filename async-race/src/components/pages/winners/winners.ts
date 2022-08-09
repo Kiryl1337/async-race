@@ -1,9 +1,6 @@
+import { FIVE_SECONDS, GARAGE, NUMBER_TEN, SUCCESS_STATUS, WINNERS } from '../../utils/constants';
 import { Winner, WinnerResponse } from '../../utils/interfaces';
-import { SUCCESS_STATUS } from '../garage/carAnimation';
 import Garage from '../garage/garage';
-
-const FIVE_SECONDS = 5000;
-const NUMBER_TEN = 10;
 
 class Winners {
   private paginationPage;
@@ -50,17 +47,15 @@ class Winners {
   private async createWinnersData(winners: Winner[], page: number): Promise<string[]> {
     return Promise.all(
       winners.map(async (winner, i) => {
-        const car = await (await fetch(`${'http://127.0.0.1:3000/garage'}/${winner.id}`)).json();
-        const html = `
-                        <tr>
-                          <td>${`${page === 1 ? '' : page - 1}${i + 1}`}</td>
-                          <td>${Garage.carImage(car.color)}</td>
-                          <td>${car.name}</td>
-                          <td>${winner.wins}</td>
-                          <td>${winner.time}</td>
-                        </tr>
-                      `;
-        return html;
+        const car = await (await fetch(`${GARAGE}/${winner.id}`)).json();
+        return ` <tr>
+                   <td>${`${page === 1 ? '' : page - 1}${i + 1}`}</td>
+                   <td>${Garage.carImage(car.color)}</td>
+                   <td>${car.name}</td>
+                   <td>${winner.wins}</td>
+                   <td>${winner.time}</td>
+                 </tr>
+               `;
       }),
     );
   }
@@ -79,9 +74,7 @@ class Winners {
   }
 
   public async getWinners(page: number, sort: string, order: string, limit = NUMBER_TEN): Promise<WinnerResponse> {
-    const response = await fetch(
-      `${'http://127.0.0.1:3000/winners'}?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`,
-    );
+    const response = await fetch(`${WINNERS}?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`);
     const winners = await response.json();
     return {
       winners: await Promise.all<Winner>(
@@ -102,10 +95,10 @@ class Winners {
   }
 
   public async addWinner(id: string, time: number): Promise<void> {
-    const winner = await fetch(`${'http://127.0.0.1:3000/winners'}/${id}`);
+    const winner = await fetch(`${WINNERS}/${id}`);
     if (winner.status === SUCCESS_STATUS) {
       const winnerJSON = await winner.json();
-      await fetch(`${'http://127.0.0.1:3000/winners'}/${id}`, {
+      await fetch(`${WINNERS}/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ id, wins: winnerJSON.wins + 1, time: time < winnerJSON.time ? time : winnerJSON.time }),
         headers: {
@@ -113,7 +106,7 @@ class Winners {
         },
       });
     } else {
-      await fetch('http://127.0.0.1:3000/winners', {
+      await fetch(WINNERS, {
         method: 'POST',
         body: JSON.stringify({ id, wins: 1, time }),
         headers: {

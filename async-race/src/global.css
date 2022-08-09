@@ -14,12 +14,12 @@ nav {
   justify-content: space-around;
   align-items: center;
   padding: 5px;
-  background-color: #61e8d2;
+  background-color: var(--primary-color);
 }
 
 .nav-button {
   padding: 5px 15px;
-  background-color: #f2a31b;
+  background-color: var(--nav-btn-color);
   text-transform: uppercase;
   border-radius: 5px;
   cursor: pointer;
@@ -52,7 +52,7 @@ nav {
 }
 
 .btn {
-  background-color: #b0e0e6;
+  background-color: var(--btn-color);
   border-radius: 10px;
   padding: 5px;
   cursor: pointer;
@@ -88,7 +88,7 @@ nav {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border-bottom: dashed black 3px;
+  border-bottom: dashed var(--black-color) 3px;
   width: 95%;
 }
 
@@ -98,8 +98,8 @@ nav {
 }
 
 .start-engine-btn {
-  border: 2px solid #31a828;
-  color: #31a828;
+  border: 2px solid var(--start-color);
+  color: var(--start-color);
   background-color: transparent;
   border-radius: 8px;
   height: 30px;
@@ -108,8 +108,8 @@ nav {
 }
 
 .stop-engine-btn {
-  border: 2px solid red;
-  color: red;
+  border: 2px solid var(--stop-color);
+  color: var(--stop-color);
   background-color: transparent;
   border-radius: 8px;
   height: 30px;
@@ -165,13 +165,13 @@ button:disabled {
 }
 
 .winners-table, th, td {
-  border: 1px solid black;
+  border: 1px solid var(--black-color);
   border-collapse: collapse;
 }
 
 th {
   padding: 10px 20px;
-  background: #61e8d2;
+  background: var(--primary-color);
 }
 
 td {
@@ -189,8 +189,8 @@ td {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #61e8d2;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--black-color);
   opacity: 0.7;
   border-radius: 15px;
 }
