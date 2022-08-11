@@ -114,6 +114,7 @@ class Winners {
         },
       });
     }
+    this.updateWinners();
   }
 
   public eventListeners(): void {

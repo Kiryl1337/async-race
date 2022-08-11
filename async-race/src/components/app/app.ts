@@ -62,6 +62,42 @@ class App {
   }
 
   private eventListeners() {
+    const race = document.getElementById('race') as HTMLButtonElement;
+    const reset = document.getElementById('reset') as HTMLButtonElement;
+    race.addEventListener('click', async () => {
+      race.disabled = true;
+      (document.getElementById('generator') as HTMLButtonElement).disabled = true;
+      (document.getElementById('create-submit') as HTMLButtonElement).disabled = true;
+      (document.getElementById('update-submit') as HTMLButtonElement).disabled = true;
+      (document.querySelectorAll('.remove-btn') as NodeListOf<HTMLButtonElement>).forEach((elem: HTMLButtonElement) => {
+        elem.disabled = true;
+      });
+      (document.querySelectorAll('.select-btn') as NodeListOf<HTMLButtonElement>).forEach((elem: HTMLButtonElement) => {
+        elem.disabled = true;
+      });
+      this.startRace();
+    });
+    reset.addEventListener('click', async () => {
+      race.disabled = false;
+      reset.disabled = true;
+      (document.getElementById('generator') as HTMLButtonElement).disabled = false;
+      (document.getElementById('create-submit') as HTMLButtonElement).disabled = false;
+      (document.getElementById('update-submit') as HTMLButtonElement).disabled = false;
+      (document.querySelectorAll('.remove-btn') as NodeListOf<HTMLButtonElement>).forEach((elem: HTMLButtonElement) => {
+        elem.disabled = false;
+      });
+      (document.querySelectorAll('.select-btn') as NodeListOf<HTMLButtonElement>).forEach((elem: HTMLButtonElement) => {
+        elem.disabled = false;
+      });
+      this.stopRace();
+    });
+    this.formEventListeners();
+    this.navEventListeners();
+    this.carEventListeners();
+    this.paginationEventListeners();
+  }
+
+  private carEventListeners() {
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
       if (eventTarget.className === 'btn remove-btn') {
@@ -81,21 +117,6 @@ class App {
     generator.addEventListener('click', async () => {
       this.generateCars();
     });
-    const race = document.getElementById('race') as HTMLButtonElement;
-    const reset = document.getElementById('reset') as HTMLButtonElement;
-    race.addEventListener('click', async () => {
-      race.disabled = true;
-      reset.disabled = false;
-      this.startRace();
-    });
-    reset.addEventListener('click', async () => {
-      race.disabled = false;
-      reset.disabled = true;
-      this.stopRace();
-    });
-    this.formEventListeners();
-    this.navEventListeners();
-    this.paginationEventListeners();
   }
 
   private formEventListeners() {
@@ -125,7 +146,6 @@ class App {
     const garage = document.querySelector('.garage-container') as HTMLDivElement;
     const winners = document.querySelector('.winners-container') as HTMLDivElement;
     garageBtn.addEventListener('click', () => {
-      this.updateGarage();
       winners.style.display = 'none';
       garage.style.display = 'flex';
     });
@@ -160,6 +180,7 @@ class App {
         const winnerTime = Number((Number(raceTime) / NUMBER_ONE_THOUSAND).toFixed(2));
         this.winners.createWinnerMessage(winnerCar.name, winnerTime);
         this.winners.addWinner(carId, winnerTime);
+        (document.getElementById('reset') as HTMLButtonElement).disabled = false;
       }
     });
   }
