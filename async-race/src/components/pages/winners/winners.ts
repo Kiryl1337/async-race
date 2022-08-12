@@ -1,17 +1,18 @@
-import { FIVE_SECONDS, GARAGE, NUMBER_TEN, SUCCESS_STATUS, WINNERS } from '../../utils/constants';
+import { FIVE_SECONDS, GARAGE, NUMBER_TEN, SUCCESS_STATUS, TIME, WINNERS, WINS } from '../../utils/constants';
+import { SortOrder } from '../../utils/enums';
 import { Winner, WinnerResponse } from '../../utils/interfaces';
 import Garage from '../garage/garage';
 
 class Winners {
-  private paginationPage;
+  private paginationPage: number;
 
-  private sortByWins = 'DESC';
+  private sortByWins: string = SortOrder.DESC;
 
-  private sortByTime = 'DESC';
+  private sortByTime: string = SortOrder.DESC;
 
-  private globalSort = 'time';
+  private globalSort = TIME;
 
-  private globalOrder = 'ASC';
+  private globalOrder: string = SortOrder.ASC;
 
   constructor() {
     this.paginationPage = 1;
@@ -34,7 +35,7 @@ class Winners {
               </tr>
             </thead>
             <tbody>
-               ${await (await this.createWinnersData(winners, page)).join('')} 
+               ${(await this.createWinnersData(winners, page)).join('')} 
             </tbody>
           </table>
           <div class="winners-pagination">
@@ -42,22 +43,6 @@ class Winners {
             <button class="btn pagination-btn" id="winners-next">Next</button>
           </div>
         </div>`;
-  }
-
-  private async createWinnersData(winners: Winner[], page: number): Promise<string[]> {
-    return Promise.all(
-      winners.map(async (winner, i) => {
-        const car = await (await fetch(`${GARAGE}/${winner.id}`)).json();
-        return ` <tr>
-                   <td>${`${page === 1 ? '' : page - 1}${i + 1}`}</td>
-                   <td>${Garage.carImage(car.color)}</td>
-                   <td>${car.name}</td>
-                   <td>${winner.wins}</td>
-                   <td>${winner.time}</td>
-                 </tr>
-               `;
-      }),
-    );
   }
 
   public async createWinnerMessage(name: string, time: number): Promise<void> {
@@ -114,50 +99,56 @@ class Winners {
         },
       });
     }
-    this.updateWinners();
+    await this.updateWinners();
   }
 
-  public eventListeners(): void {
+  private async createWinnersData(winners: Winner[], page: number): Promise<string[]> {
+    return Promise.all(
+      winners.map(async (winner, i) => {
+        const car = await (await fetch(`${GARAGE}/${winner.id}`)).json();
+        return ` <tr>
+                   <td>${`${page === 1 ? '' : page - 1}${i + 1}`}</td>
+                   <td>${Garage.carImage(car.color)}</td>
+                   <td>${car.name}</td>
+                   <td>${winner.wins}</td>
+                   <td>${winner.time}</td>
+                 </tr>
+               `;
+      }),
+    );
+  }
+
+  private eventListeners(): void {
     const nextBtn = document.getElementById('winners-next') as HTMLButtonElement;
-    nextBtn.addEventListener('click', () => {
-      this.nextAction();
+    nextBtn.addEventListener('click', async () => {
+      await this.nextAction();
     });
     const prevBtn = document.getElementById('winners-prev') as HTMLButtonElement;
     prevBtn.addEventListener('click', async () => {
-      this.prevAction();
+      await this.prevAction();
     });
     const winsBtn = document.querySelector('.wins-btn') as HTMLElement;
     winsBtn.addEventListener('click', async () => {
-      if (this.sortByWins === 'ASC') {
-        this.sortByWins = 'DESC';
-        this.globalOrder = 'DESC';
-      } else {
-        this.sortByWins = 'ASC';
-        this.globalOrder = 'ASC';
-      }
-      this.globalSort = 'wins';
-      this.updateWinners();
+      this.sortByWins = this.sortByWins === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC;
+      this.globalOrder = this.sortByWins === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC;
+      this.globalSort = WINS;
+      await this.updateWinners();
     });
     const timeBtn = document.querySelector('.time-btn') as HTMLElement;
     timeBtn.addEventListener('click', async () => {
-      if (this.sortByTime === 'ASC') {
-        this.sortByTime = 'DESC';
-        this.globalOrder = 'DESC';
-      } else {
-        this.sortByTime = 'ASC';
-        this.globalOrder = 'ASC';
-      }
-      this.globalSort = 'time';
-      this.updateWinners();
+      this.sortByTime = this.sortByTime === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC;
+      this.globalOrder = this.sortByTime === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC;
+      this.globalSort = TIME;
+      await this.updateWinners();
     });
   }
 
   private async nextAction(): Promise<void> {
     const { totalCount } = await this.getWinners(this.paginationPage, this.globalSort, this.globalOrder);
     if (totalCount) {
-      if (Number(totalCount) / (NUMBER_TEN * this.paginationPage) > 1) {
+      if (+totalCount / (NUMBER_TEN * this.paginationPage) > 1) {
         this.paginationPage += 1;
-        this.updateWinners();
+        await this.updateWinners();
       }
     }
   }
@@ -165,7 +156,7 @@ class Winners {
   private async prevAction(): Promise<void> {
     if (this.paginationPage > 1) {
       this.paginationPage -= 1;
-      this.updateWinners();
+      await this.updateWinners();
     }
   }
 }

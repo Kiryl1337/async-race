@@ -13,22 +13,24 @@ import {
   WINNERS,
 } from '../utils/constants';
 import { carBrands, carModels } from '../utils/data';
+import { BtnClass } from '../utils/enums';
+import { getPosition, getRandomColor } from '../utils/helpers';
 import { Car, CarResponse } from '../utils/interfaces';
 
 let currentCar: Promise<Car>;
 
 class App {
-  private garage;
+  private garage: Garage;
 
-  private winners;
+  private winners: Winners;
 
-  private paginationPage;
+  private paginationPage: number;
 
-  private updateName;
+  private updateName: HTMLInputElement;
 
-  private updateColor;
+  private updateColor: HTMLInputElement;
 
-  private updateBtn;
+  private updateBtn: HTMLButtonElement;
 
   constructor() {
     this.garage = new Garage();
@@ -41,15 +43,8 @@ class App {
   }
 
   public async start(): Promise<void> {
-    this.updateGarage();
+    await this.updateGarage();
     this.eventListeners();
-  }
-
-  private async updateGarage(): Promise<void> {
-    const { cars, totalCount } = await this.getCars(this.paginationPage);
-    if (totalCount) {
-      this.garage.garageContent(cars, totalCount, this.paginationPage);
-    }
   }
 
   public async getCars(page: number, limit = NUMBER_SEVEN): Promise<CarResponse> {
@@ -61,7 +56,14 @@ class App {
     };
   }
 
-  private eventListeners() {
+  private async updateGarage(): Promise<void> {
+    const { cars, totalCount } = await this.getCars(this.paginationPage);
+    if (totalCount) {
+      this.garage.garageContent(cars, totalCount, this.paginationPage);
+    }
+  }
+
+  private eventListeners(): void {
     const race = document.getElementById('race') as HTMLButtonElement;
     const reset = document.getElementById('reset') as HTMLButtonElement;
     race.addEventListener('click', async () => {
@@ -75,7 +77,7 @@ class App {
       (document.querySelectorAll('.select-btn') as NodeListOf<HTMLButtonElement>).forEach((elem: HTMLButtonElement) => {
         elem.disabled = true;
       });
-      this.startRace();
+      await this.startRace();
     });
     reset.addEventListener('click', async () => {
       race.disabled = false;
@@ -89,7 +91,7 @@ class App {
       (document.querySelectorAll('.select-btn') as NodeListOf<HTMLButtonElement>).forEach((elem: HTMLButtonElement) => {
         elem.disabled = false;
       });
-      this.stopRace();
+      await this.stopRace();
     });
     this.formEventListeners();
     this.navEventListeners();
@@ -97,39 +99,41 @@ class App {
     this.paginationEventListeners();
   }
 
-  private carEventListeners() {
+  private carEventListeners(): void {
     window.addEventListener('click', async (event) => {
       const eventTarget = <HTMLButtonElement>event.target;
-      if (eventTarget.className === 'btn remove-btn') {
-        this.removeCar(eventTarget);
-      }
-      if (eventTarget.className === 'btn select-btn') {
-        this.selectCar(eventTarget);
-      }
-      if (eventTarget.className === 'start-engine-btn') {
-        this.startEngine(eventTarget.id.split('-')[3]);
-      }
-      if (eventTarget.className === 'stop-engine-btn') {
-        this.stopEngine(eventTarget.id.split('-')[3]);
+      switch (eventTarget.className) {
+        case BtnClass.REMOVE:
+          await this.removeCar(eventTarget);
+          break;
+        case BtnClass.SELECT:
+          await this.selectCar(eventTarget);
+          break;
+        case BtnClass.START_ENGINE:
+          await this.startEngine(eventTarget.id.split('-')[3]);
+          break;
+        case BtnClass.STOP_ENGINE:
+          await this.stopEngine(eventTarget.id.split('-')[3]);
+          break;
       }
     });
     const generator = document.getElementById('generator') as HTMLButtonElement;
     generator.addEventListener('click', async () => {
-      this.generateCars();
+      await this.generateCars();
     });
   }
 
-  private formEventListeners() {
+  private formEventListeners(): void {
     const create = document.getElementById('create') as HTMLButtonElement;
     create.addEventListener('submit', async (event) => {
       event.preventDefault();
-      this.createCarAction();
-      this.updateGarage();
+      await this.createCarAction();
+      await this.updateGarage();
     });
     const update = document.getElementById('update') as HTMLButtonElement;
     update.addEventListener('submit', async (event) => {
       event.preventDefault();
-      this.updateCar();
+      await this.updateCar();
       if (this.updateName && this.updateColor && this.updateBtn) {
         this.updateName.value = '';
         this.updateColor.value = '#000000';
@@ -140,7 +144,7 @@ class App {
     });
   }
 
-  private navEventListeners() {
+  private navEventListeners(): void {
     const garageBtn = document.getElementById('garage-view') as HTMLButtonElement;
     const winnersBtn = document.getElementById('winners-view') as HTMLButtonElement;
     const garage = document.querySelector('.garage-container') as HTMLDivElement;
@@ -157,18 +161,18 @@ class App {
     });
   }
 
-  private paginationEventListeners() {
+  private paginationEventListeners(): void {
     const nextBtn = document.getElementById('garage-next') as HTMLButtonElement;
-    nextBtn.addEventListener('click', () => {
-      this.nextAction();
+    nextBtn.addEventListener('click', async () => {
+      await this.nextAction();
     });
     const prevBtn = document.getElementById('garage-prev') as HTMLButtonElement;
     prevBtn.addEventListener('click', async () => {
-      this.prevAction();
+      await this.prevAction();
     });
   }
 
-  private async startRace() {
+  private async startRace(): Promise<void> {
     const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
     let isWinner = false;
     cars.forEach(async (carElem) => {
@@ -185,9 +189,9 @@ class App {
     });
   }
 
-  private async stopRace() {
+  private async stopRace(): Promise<void> {
     const { cars } = await this.getCars(this.paginationPage, NUMBER_SEVEN);
-    cars.forEach(async (carElem) => {
+    cars.forEach((carElem) => {
       const carId = carElem.id.toString();
       this.stopEngine(carId);
     });
@@ -204,8 +208,8 @@ class App {
     const raceTime = Math.round(race.distance / race.velocity);
     const car = document.getElementById(`car-${carId}`) as HTMLElement;
     const flag = document.getElementById(`finish-${carId}`) as HTMLElement;
-    const carPosition = this.getPosition(car);
-    const flagPosition = this.getPosition(flag);
+    const carPosition = getPosition(car);
+    const flagPosition = getPosition(flag);
     const raceDistance = Math.floor(Math.sqrt(Math.pow(carPosition - flagPosition, 2)) + NUMBER_TWENTY);
     const raceStatus = createAnimation(car, raceDistance, carId, raceTime);
     startBtn.disabled = true;
@@ -226,17 +230,12 @@ class App {
     stopBtn.disabled = true;
   }
 
-  public getPosition(element: HTMLElement): number {
-    const { left, width } = element.getBoundingClientRect();
-    return left + width / 2;
-  }
-
   private async generateCars(): Promise<void> {
     for (let i = 0; i < NUMBER_ONE_HUNDRED; i++) {
       const randomBrand = carBrands[Math.floor(Math.random() * carBrands.length)];
       const randomModel = carModels[Math.floor(Math.random() * carModels.length)];
       const randomName = randomBrand + ' ' + randomModel;
-      const randomColor = this.getRandomColor();
+      const randomColor = getRandomColor();
 
       const body = { name: randomName, color: randomColor };
       await fetch(GARAGE, {
@@ -247,16 +246,7 @@ class App {
         },
       });
     }
-    this.updateGarage();
-  }
-
-  private getRandomColor(): string {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let j = 0; j < 6; j++) {
-      color += letters[Math.floor(Math.random() * letters.length)];
-    }
-    return color;
+    await this.updateGarage();
   }
 
   private async createCarAction(): Promise<void> {
@@ -277,7 +267,7 @@ class App {
     const carId = element.id.split('-')[2];
     await fetch(`${GARAGE}/${carId}`, { method: 'DELETE' });
     await fetch(`${WINNERS}/${carId}`, { method: 'DELETE' });
-    this.updateGarage();
+    await this.updateGarage();
   }
 
   private async selectCar(element: Element): Promise<void> {
@@ -303,15 +293,15 @@ class App {
         'Content-Type': 'application/json',
       },
     });
-    this.updateGarage();
+    await this.updateGarage();
   }
 
   private async nextAction(): Promise<void> {
     const { totalCount } = await this.getCars(this.paginationPage);
     if (totalCount) {
-      if (Number(totalCount) / (NUMBER_SEVEN * this.paginationPage) > 1) {
+      if (+totalCount / (NUMBER_SEVEN * this.paginationPage) > 1) {
         this.paginationPage += 1;
-        this.updateGarage();
+        await this.updateGarage();
       }
     }
   }
@@ -319,7 +309,7 @@ class App {
   private async prevAction(): Promise<void> {
     if (this.paginationPage > 1) {
       this.paginationPage -= 1;
-      this.updateGarage();
+      await this.updateGarage();
     }
   }
 }

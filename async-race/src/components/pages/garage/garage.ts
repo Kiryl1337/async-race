@@ -25,7 +25,7 @@ class Garage {
                           <form class="update-form" id="update">
                             <input class="form-input" id="update-name" name="name" type="text" disabled required>
                             <input class="form-color" id="update-color" name="color" type="color" value="#000000" disabled>
-                            <button class="btn" id="update-submit" href="#" disabled>Update</button>
+                            <button class="btn" id="update-submit" disabled>Update</button>
                           </form>
                         </div>
                         <div class="garage-controls">

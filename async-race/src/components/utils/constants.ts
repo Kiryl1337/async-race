@@ -11,3 +11,6 @@ export const ENGINE = 'http://127.0.0.1:3000/engine';
 
 export const SUCCESS_STATUS = 200;
 export const animationMap: { [key: string]: number } = {};
+
+export const TIME = 'time';
+export const WINS = 'wins';
