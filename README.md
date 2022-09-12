@@ -1,2 +1,2 @@
-# kiryl1337-JSFE2022Q1
-Private repository for @kiryl1337
+1. You can find server for the project here: https://github.com/mikhama/async-race-api 
+2. Deploy: https://kiryl1337.github.io/async-race/
